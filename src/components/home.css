@@ -1,4 +1,4 @@
-.home-container{
+.home-container {
     margin-top: 4rem;
 }
 #home {
@@ -72,4 +72,22 @@ body {
     margin-left: -12px;
     margin-right: -13px;
     display: block; /* Removes extra space below image */
+}
+
+.loading-overlay {
+    position: fixed; /* Cover the entire screen */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    display: flex;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    z-index: 999; /* Ensure it appears above other content */
+}
+
+.loading-gif {
+    width: 150px ; /* Adjust size as needed */
+    height: 150px; /* Adjust size as needed */
 }

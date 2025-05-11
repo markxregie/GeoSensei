@@ -6,11 +6,14 @@
     --antiflash-white: #F1F0F1;
   }
 .navbar-brand {
-    margin-left: -245px; /* Adjust as needed */
-    margin-right: 25rem;
+    margin-left: -235px; /* Adjust as needed */
+    margin-right: 19rem;
     font-size: 3rem;
     color:var(--davys-gray);
     font-weight: 500;
+  }
+  .navbar-brand:hover{
+    color: var(--davys-gray-2);
   }
   
 

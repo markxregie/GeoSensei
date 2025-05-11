@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useParams, useNavigate } from "react-router-dom";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Appheader from "./components/header";
@@ -8,17 +8,23 @@ import AppAbout from "./components/About";
 import AppInnovation from "./components/Innovation";
 import AppBenefits from "./components/benefits";
 import AppFooter from "./components/footer";
-import NewHeader from "./components/newheader"; 
+import NewHeader from "./components/newheader";
 import GeoSection from "./components/Geosection";
-import Chatbot from './components/Chatbot'; 
+import Chatbot from "./components/Chatbot";
+import Guesstheflag from "./components/Guesstheflag";
+import Capitals from "./components/capital";
+import NotFound from "./pages/NotFound";
+import Game from "./components/GameScreen"; // GeoGuessing Game Component
 
 function App() {
+  const [continent, setContinent] = useState("Asia");
+
   return (
     <div className="App">
-      <Chatbot /> {/* Render the Chatbot component */}
-
+      <Chatbot />
       <Router>
         <Routes>
+          {/* Home Page */}
           <Route
             path="/"
             element={
@@ -34,20 +40,72 @@ function App() {
               </>
             }
           />
+
+          {/* Continent-Specific Page */}
+          <Route path="/newpage/:continent" element={<ContinentPage setContinent={setContinent} />} />
+
+          {/* Dynamic Quiz Route */}
           <Route
-            path="/newpage"
+            path="/quiz/:quizType/:continent"
+            element={<QuizComponent setContinent={setContinent} continent={continent} />}
+          />
+
+          {/* GeoGuessing Game */}
+          <Route
+            path="/geoguess"
             element={
               <>
-                <NewHeader /> {/* Different Header */}
+                <NewHeader setContinent={setContinent} activeContinent={continent} />
                 <main>
-                  <GeoSection />
+                  <Game />
                 </main>
               </>
             }
           />
+
+          {/* 404 Page */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </div>
+  );
+}
+
+/* ✅ Fix: Show Only One Quiz Component Based on URL */
+function QuizComponent({ setContinent, continent }) {
+  const { quizType } = useParams();
+
+  return (
+    <>
+      <NewHeader setContinent={setContinent} activeContinent={continent} />
+      <main>
+        {quizType === "guess-the-flag" && <Guesstheflag />}
+        {quizType === "capitals" && <Capitals />}
+      </main>
+    </>
+  );
+}
+
+/* ✅ Continent Page to Manage Navigation */
+function ContinentPage({ setContinent }) {
+  const { continent } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!continent) {
+      navigate("/newpage/Asia");
+    } else {
+      setContinent(continent);
+    }
+  }, [continent, setContinent, navigate]);
+
+  return (
+    <>
+      <NewHeader setContinent={setContinent} activeContinent={continent} />
+      <main>
+        <GeoSection continent={continent} />
+      </main>
+    </>
   );
 }
 
