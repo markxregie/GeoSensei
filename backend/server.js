@@ -2,125 +2,152 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 const chatbotRoutes = require("./chatbot");
-
+const { db } = require("./db");  // Import SQLite connection
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// No MSSQL poolPromise initialization needed for SQLite
 
 app.use(cors());
 app.use(express.json());
 
-const continentCountries = {
-  Asia: ["AF", "AM", "AZ", "BH", "BD", "BT", "BN", "KH", "CN", "CY", "GE", "IN", "ID", "IR", "IQ", "IL", "JP", "JO", "KZ", "KW", "KG", "LA", "LB", "MY", "MV", "MN", "MM", "NP", "KP", "OM", "PK", "PH", "QA", "SA", "SG", "KR", "LK", "SY", "TW", "TJ", "TH", "TR", "TM", "AE", "UZ", "VN", "YE"],
-  Africa: ["DZ", "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "DJ", "EG", "GQ", "ER", "ET", "GA", "GM", "GH", "GN", "GW", "CI", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "ZM", "ZW"],
-  Europe: ["AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IS", "IE", "IT", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL", "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI", "ES", "SE", "CH", "UA", "GB", "VA"],
-  "North America": ["AG", "BS", "BB", "BZ", "CA", "CR", "CU", "DM", "DO", "SV", "GD", "GT", "HT", "HN", "JM", "MX", "NI", "PA", "KN", "LC", "VC", "TT", "US"],
-  "South America": ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "GY", "PY", "PE", "SR", "UY", "VE"],
-  Australia: ["AU", "FJ", "KI", "MH", "FM", "NR", "NZ", "PW", "PG", "WS", "SB", "TO", "TV", "VU"]
-};
-
-// Function to fetch country data with retries
-const fetchCountryData = async (code, retries = 3) => {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await axios.get(`https://restcountries.com/v3.1/alpha/${code}`, { timeout: 5000 });
-            if (!response.data || response.data.length === 0) throw new Error("Invalid response");
-
-            const country = response.data[0];
-            return {
-                name: country.name?.common || `Unknown (${code})`,
-                flag: country.flags?.svg || country.flags?.png || "",
-                capital: country.capital ? country.capital[0] : "No capital found"
-            };
-        } catch (error) {
-            console.error(`Attempt ${i + 1} failed for country ${code}:`, error.message);
-            if (i === retries - 1) return { name: `Unknown (${code})`, flag: "", capital: "Unknown" };
-        }
-    }
-};
-
-
-// API route to fetch quiz data
-app.get("/api/quiz/:continent", async (req, res) => {
-    try {
-        const { continent } = req.params;
-        const countryCodes = continentCountries[continent];
-
-        if (!countryCodes) {
-            return res.status(400).json({ error: "Invalid continent" });
-        }
-
-        const correctCode = countryCodes[Math.floor(Math.random() * countryCodes.length)];
-        const incorrectCodes = countryCodes
-            .filter(code => code !== correctCode)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 3);
-
-        const choices = [correctCode, ...incorrectCodes].sort(() => Math.random() - 0.5);
-
-        const countryData = {};
-        await Promise.all(
-            choices.map(async (code) => {
-                countryData[code] = await fetchCountryData(code);
-            })
-        );
-
-        res.json({
-            flag: countryData[correctCode].flag,
-            choices: choices.map(code => ({
-                code,
-                name: countryData[code].name,
-                correct: code === correctCode
-            }))
-        });
-    } catch (error) {
-        console.error("Error in API:", error.message);
-        res.status(500).json({ error: "Failed to fetch quiz data" });
-    }
-});
-
-// API route to fetch capitals quiz data
-app.get("/api/quiz/capitals/:continent", async (req, res) => {
-    try {
-        const { continent } = req.params;
-        const countryCodes = continentCountries[continent];
-
-        if (!countryCodes) {
-            return res.status(400).json({ error: "Invalid continent" });
-        }
-
-        const correctCode = countryCodes[Math.floor(Math.random() * countryCodes.length)];
-        const incorrectCodes = countryCodes
-            .filter(code => code !== correctCode)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 3);
-
-        const choices = [correctCode, ...incorrectCodes].sort(() => Math.random() - 0.5);
-
-        const countryData = {};
-        await Promise.all(
-            choices.map(async (code) => {
-                countryData[code] = await fetchCountryData(code);
-            })
-        );
-
-        res.json({
-            flag: countryData[correctCode].flag,
-            choices: choices.map(code => ({
-                code,
-                name: countryData[code].name,
-                capital: countryData[code].capital,
-                correct: code === correctCode
-            }))
-        });
-    } catch (error) {
-        console.error("Error in API:", error.message);
-        res.status(500).json({ error: "Failed to fetch capitals quiz data" });
-    }
-});
+// Serve static files from public folder
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.use("/api/chatbot", chatbotRoutes);
+
+// New endpoint to get flags and options by continent
+app.get("/api/flags/:continentName", (req, res) => {
+    const continentName = req.params.continentName;
+
+    // Get continent id
+    const continentQuery = `SELECT id FROM continents WHERE continent_name = ?`;
+    db.get(continentQuery, [continentName], (err, continentRow) => {
+        if (err) {
+            console.error("Error fetching continent:", err);
+            return res.status(500).json({ error: "Internal server error" });
+        }
+        if (!continentRow) {
+            return res.status(404).json({ error: "Continent not found" });
+        }
+        const continentId = continentRow.id;
+
+        // Get countries in the continent
+        const countriesQuery = `SELECT id, country_name, flag_image FROM countries WHERE continent_id = ?`;
+        db.all(countriesQuery, [continentId], (err, countriesInContinent) => {
+            if (err) {
+                console.error("Error fetching countries in continent:", err);
+                return res.status(500).json({ error: "Internal server error" });
+            }
+            if (countriesInContinent.length === 0) {
+                return res.status(404).json({ error: "No countries found in continent" });
+            }
+
+            // Select one correct answer randomly
+            const correctAnswer = countriesInContinent[Math.floor(Math.random() * countriesInContinent.length)];
+
+            // Get random countries from other continents for options
+            const optionsQuery = `
+                SELECT id, country_name FROM countries WHERE id != ? ORDER BY RANDOM() LIMIT 3
+            `;
+            db.all(optionsQuery, [correctAnswer.id], (err, randomOptions) => {
+                if (err) {
+                    console.error("Error fetching random options:", err);
+                    return res.status(500).json({ error: "Internal server error" });
+                }
+
+                // Combine correct answer with random options
+                const options = randomOptions.map(opt => opt.country_name);
+                options.push(correctAnswer.country_name);
+
+                // Shuffle options
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [options[i], options[j]] = [options[j], options[i]];
+                }
+
+                res.json({
+                    correctAnswer: {
+                        country_name: correctAnswer.country_name,
+                        flag_image: correctAnswer.flag_image
+                    },
+                    options: options
+                });
+            });
+        });
+    });
+});
+
+app.get("/api/flags/all/:continentName", (req, res) => {
+    const continentName = req.params.continentName;
+
+    // Get continent id
+    const continentQuery = `SELECT id FROM continents WHERE continent_name = ?`;
+    db.get(continentQuery, [continentName], (err, continentRow) => {
+        if (err) {
+            console.error("Error fetching continent:", err);
+            return res.status(500).json({ error: "Internal server error" });
+        }
+        if (!continentRow) {
+            return res.status(404).json({ error: "Continent not found" });
+        }
+        const continentId = continentRow.id;
+
+        // Get countries in the continent including capital
+        const countriesQuery = `SELECT id, country_name, capital, flag_image FROM countries WHERE continent_id = ?`;
+        db.all(countriesQuery, [continentId], (err, countriesInContinent) => {
+            if (err) {
+                console.error("Error fetching countries in continent:", err);
+                return res.status(500).json({ error: "Internal server error" });
+            }
+            if (countriesInContinent.length === 0) {
+                return res.status(404).json({ error: "No countries found in continent" });
+            }
+
+            // For each country, generate options (3 random other capitals + correct capital)
+            const results = [];
+            let processedCount = 0;
+
+            countriesInContinent.forEach(country => {
+                const optionsQuery = `
+                    SELECT capital FROM countries WHERE id != ? ORDER BY RANDOM() LIMIT 3
+                `;
+                db.all(optionsQuery, [country.id], (err, randomOptions) => {
+                    if (err) {
+                        console.error("Error fetching random options:", err);
+                        return res.status(500).json({ error: "Internal server error" });
+                    }
+
+                    const options = randomOptions.map(opt => opt.capital);
+                    options.push(country.capital);
+
+                    // Shuffle options
+                    for (let i = options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [options[i], options[j]] = [options[j], options[i]];
+                    }
+
+                    results.push({
+                        correctAnswer: {
+                            country_name: country.country_name,
+                            capital: country.capital,
+                            flag_image: country.flag_image
+                        },
+                        options: options
+                    });
+
+                    processedCount++;
+                    if (processedCount === countriesInContinent.length) {
+                        res.json(results);
+                    }
+                });
+            });
+        });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

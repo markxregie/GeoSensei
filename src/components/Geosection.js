@@ -1,6 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom"; 
 import pixelsGif from "../images/pixels.gif";
+import capitalgif from "../images/maps.gif";
+import landmarkgif from "../images/cs_4.gif";
+import triviagif from "../images/trivia.gif"
 import "./Geosection.css"; 
 
 const GeoSection = ({ continent }) => {
@@ -8,14 +11,14 @@ const GeoSection = ({ continent }) => {
 
   const goToQuiz = (quizType) => {
     if (!continent) return;
-    navigate(`/quiz/${quizType}/${continent}`); // Pass quiz type and continent in URL
+    navigate(`/quiz/${quizType}/${continent}`); 
   };
 
   return (
     <div className="geo-section-container">
-      <div className="geo-section-background"></div> {/* New div for background */}
+      <div className="geo-section-background"></div> 
       
-      <div className="geo-section-content"> {/* This div will hold the text content */}
+      <div className="geo-section-content"> 
         <h1 className="continent-heading">
           {continent ? continent : "Loading..."}
         </h1>
@@ -32,17 +35,24 @@ const GeoSection = ({ continent }) => {
           </div>
 
           <div className="game-card" onClick={() => goToQuiz("capitals")}>
-            <div className="card-image"></div>
+            <div className="card-image">
+              <img src={capitalgif} alt="Capitals" className="gif-image" />
+            </div>
+            
             <h2 className="card-title">Capitals</h2>
           </div>
 
           <div className="game-card" onClick={() => goToQuiz("landmark")}>
-            <div className="card-image"></div>
+            <div className="card-image">
+              <img src={landmarkgif} alt="Capitals" className="gif-image" />
+            </div>
             <h2 className="card-title">Landmark</h2>
           </div>
 
           <div className="game-card" onClick={() => goToQuiz("trivia")}>
-            <div className="card-image"></div>
+            <div className="card-image">
+              <img src={triviagif} alt="Capitals" className="gif-image" />
+            </div>
             <h2 className="card-title">Trivia</h2>
           </div>
         </div>

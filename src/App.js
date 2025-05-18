@@ -13,6 +13,7 @@ import GeoSection from "./components/Geosection";
 import Chatbot from "./components/Chatbot";
 import Guesstheflag from "./components/Guesstheflag";
 import Capitals from "./components/capital";
+import Landmark from "./components/Landmark";
 import NotFound from "./pages/NotFound";
 import Game from "./components/GameScreen"; // GeoGuessing Game Component
 
@@ -81,6 +82,7 @@ function QuizComponent({ setContinent, continent }) {
       <main>
         {quizType === "guess-the-flag" && <Guesstheflag />}
         {quizType === "capitals" && <Capitals />}
+        {quizType === "landmark" && <Landmark />}
       </main>
     </>
   );

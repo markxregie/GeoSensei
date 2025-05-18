@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require("express");
 const cors = require("cors");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -7,7 +9,7 @@ const router = express.Router(); // Use router instead of app
 router.use(cors());
 router.use(express.json());
 
-const GEMINI_API_KEY = "AIzaSyALwQJu2f6t8gDOyiuo4L2O49sdpjQ07w4"; // Your API Key
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Your API Key from environment variable
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 

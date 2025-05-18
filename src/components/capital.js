@@ -1,102 +1,130 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
 import backIcon from "../images/back.svg";
 import questionIcon from "../images/question.svg";
 import cupGif from "../images/cup.gif";
 import "./guesstheflag.css";
-import axios from "axios";
 
 export default function Capitals() {
     const navigate = useNavigate();
     const { continent } = useParams();
 
-    // State variables
-    const [showModal, setShowModal] = useState(false);
-    const [showScoreModal, setShowScoreModal] = useState(false);
-    const [quizData, setQuizData] = useState(null);
-    const [selectedAnswer, setSelectedAnswer] = useState(null);
-    const [isCorrect, setIsCorrect] = useState(null);
-    const [usedFlags, setUsedFlags] = useState(new Set());
-    const [correctCount, setCorrectCount] = useState(0);
-    const [wrongCount, setWrongCount] = useState(0);
-    const [questionNumber, setQuestionNumber] = useState(0);
+    const [showExitModal, setShowExitModal] = React.useState(false);
+    const [showScoreModal, setShowScoreModal] = React.useState(false);
+    const [quizList, setQuizList] = React.useState([]);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
+    const [options, setOptions] = React.useState([]);
+    const [selectedOption, setSelectedOption] = React.useState(null);
+    const [isCorrect, setIsCorrect] = React.useState(null);
+    const [score, setScore] = React.useState(0);
+    const [wrongCount, setWrongCount] = React.useState(0);
 
-    const TOTAL_QUESTIONS = 10;
+    // Audio refs
+    const correctSound = React.useRef(new Audio("/sound/correct.mp3"));
+    const wrongSound = React.useRef(new Audio("/sound/wrong.mp3"));
+    const bgMusic = React.useRef(new Audio("/sound/bgmusic.mp3"));
 
-    // Background music
-    useEffect(() => {
-        const bgMusic = new Audio(`${process.env.PUBLIC_URL}/sound/bgmusic.mp3`);
-        bgMusic.loop = true;
-        bgMusic.volume = 0.5;
-        bgMusic.play().catch(err => console.error("Autoplay blocked:", err));
-
-        return () => {
-            bgMusic.pause();
-            bgMusic.currentTime = 0;
-        };
-    }, []);
-
-    // Fetch quiz data
-    const fetchQuiz = async () => {
-        if (questionNumber >= TOTAL_QUESTIONS) {
-            setShowScoreModal(true);
-            return;
+    React.useEffect(() => {
+        // Helper to shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
-        try {
-            const response = await axios.get(`http://localhost:3001/api/quiz/capitals/${continent}`);
-            let newQuestion = response.data;
-
-            if (usedFlags.has(newQuestion.flag)) {
-                await fetchQuiz();
-                return;
-            }
-
-            setQuizData(newQuestion);
-            setSelectedAnswer(null);
-            setIsCorrect(null);
-
-            setUsedFlags(prev => {
-                const updatedSet = new Set(prev);
-                updatedSet.add(newQuestion.flag);
-                return updatedSet;
+        // Fetch all capitals quiz data for the continent
+        fetch(`http://localhost:3002/api/flags/all/${continent}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("Fetched capital quiz data:", data);
+                const shuffled = shuffleArray(data);
+                setQuizList(shuffled);
+                setCurrentQuestionIndex(0);
+                if (shuffled.length > 0) {
+                    // Defensive: check if options exist and are array
+                    if (Array.isArray(shuffled[0].options) && shuffled[0].options.length > 0) {
+                        setOptions(shuffled[0].options);
+                    } else {
+                        // Generate options: include correct answer and 3 random capitals from data
+                    const correctCapital = shuffled[0].correctAnswer.capital;
+                    const otherCapitals = shuffled
+                        .map(item => item.correctAnswer.capital)
+                        .filter(cap => cap !== correctCapital);
+                        // Shuffle otherCapitals and pick 3
+                        for (let i = otherCapitals.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [otherCapitals[i], otherCapitals[j]] = [otherCapitals[j], otherCapitals[i]];
+                        }
+                        const generatedOptions = [correctCapital, ...otherCapitals.slice(0, 3)];
+                        // Shuffle generatedOptions
+                        for (let i = generatedOptions.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [generatedOptions[i], generatedOptions[j]] = [generatedOptions[j], generatedOptions[i]];
+                        }
+                        setOptions(generatedOptions);
+                    }
+                    setSelectedOption(null);
+                    setIsCorrect(null);
+                }
+                setScore(0);
+                setWrongCount(0);
+            })
+            .catch(err => {
+                console.error("Error fetching capital quiz data:", err);
             });
 
-            setQuestionNumber(prev => prev + 1);
-        } catch (error) {
-            console.error("Error fetching quiz:", error);
-        }
-    };
+        // Play background music
+        bgMusic.current.loop = true;
+        bgMusic.current.volume = 0.5;
+        bgMusic.current.play().catch(() => {});
 
-    useEffect(() => {
-        fetchQuiz();
+        return () => {
+            bgMusic.current.pause();
+            bgMusic.current.currentTime = 0;
+        };
     }, [continent]);
 
-    const handleAnswerClick = (choice) => {
-        setSelectedAnswer(choice.capital);
-        setIsCorrect(choice.correct);
+    const handleBackClick = () => setShowExitModal(true);
 
-        if (choice.correct) {
-            setCorrectCount(prev => prev + 1);
+    const handleConfirmExit = () => {
+        setShowExitModal(false);
+        navigate(`/newpage/${continent}`);
+    };
+
+    const handleOptionClick = (option) => {
+        if (selectedOption !== null) return;
+        setSelectedOption(option);
+
+        const correctAnswer = quizList[currentQuestionIndex]?.correctAnswer.capital;
+        const correct = option === correctAnswer;
+        setIsCorrect(correct);
+
+        if (correct) {
+            correctSound.current.play();
+            setScore(prev => prev + 1);
         } else {
+            wrongSound.current.play();
             setWrongCount(prev => prev + 1);
         }
 
-        const audio = new Audio(`${process.env.PUBLIC_URL}/sound/${choice.correct ? "correct.mp3" : "wrong.mp3"}`);
-        audio.play();
-
         setTimeout(() => {
-            fetchQuiz();
-        }, 1000);
+            if (currentQuestionIndex + 1 < quizList.length) {
+                const nextIndex = currentQuestionIndex + 1;
+                setCurrentQuestionIndex(nextIndex);
+                setOptions(quizList[nextIndex].options);
+                setSelectedOption(null);
+                setIsCorrect(null);
+            } else {
+                setShowScoreModal(true);
+            }
+        }, 1500);
     };
 
-    const handleBackClick = () => {
-        setShowModal(true);
-    };
-
-    const handleConfirmExit = () => {
-        setShowModal(false);
+    const handleCloseScoreModal = () => {
+        setShowScoreModal(false);
         navigate(`/newpage/${continent}`);
     };
 
@@ -108,37 +136,34 @@ export default function Capitals() {
             <h1>Guess the Capital</h1>
             <div className="subtitle">{continent}</div>
 
-            {quizData ? (
-                <>
-                    <div className="flag-box">
-                        <img src={quizData.flag} alt="Country Flag" className="flag-image" />
-                    </div>
+            {/* Flag container */}
+            <div className="flag-box">
+                {quizList.length > 0 ? (
+                    <img
+                        src={`http://localhost:3002/${quizList[currentQuestionIndex].correctAnswer.flag_image}`}
+                        alt="Flag"
+                        className="flag-image"
+                    />
+                ) : (
+                    <div>Loading...</div>
+                )}
+            </div>
 
-                    <div className="options">
-                        {quizData.choices.map((choice, index) => (
-                            <button 
-                                key={choice.code} 
-                                className={`option ${selectedAnswer === choice.capital ? (isCorrect ? "correct" : "wrong") : ""}`} 
-                                onClick={() => handleAnswerClick(choice)}
-                                disabled={selectedAnswer !== null}
-                            >
-                                {String.fromCharCode(65 + index)}. {choice.capital}
-                            </button>
-                        ))}
+            {/* Capital options */}
+            <div className="options">
+                {options.map((option, index) => (
+                    <div
+                        key={index}
+                        className={`option ${selectedOption === option ? (isCorrect ? "correct" : "wrong") : ""}`}
+                        onClick={() => handleOptionClick(option)}
+                    >
+                        {option}
                     </div>
-
-                    {selectedAnswer !== null && (
-                        <p className={`feedback ${isCorrect ? "correct" : "wrong"}`}>
-                            {isCorrect ? "Correct!" : "Wrong answer."}
-                        </p>
-                    )}
-                </>
-            ) : (
-                <p>Loading quiz...</p>
-            )}
+                ))}
+            </div>
 
             {/* Exit Confirmation Modal */}
-            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+            <Modal show={showExitModal} onHide={() => setShowExitModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Exit Quiz</Modal.Title>
                 </Modal.Header>
@@ -147,24 +172,25 @@ export default function Capitals() {
                     <p>Are you sure you want to exit the quiz?</p>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                    <Button variant="secondary" onClick={() => setShowExitModal(false)}>Cancel</Button>
                     <Button variant="danger" onClick={handleConfirmExit}>Yes, Exit</Button>
                 </Modal.Footer>
             </Modal>
 
-            {/* Score Summary Modal */}
-            <Modal show={showScoreModal} onHide={() => navigate(`/newpage/${continent}`)} centered>
-                <Modal.Header>
-                    <Modal.Title className="modal-text">Quiz Summary</Modal.Title>
+            {/* Final Score Modal */}
+            <Modal show={showScoreModal} onHide={handleCloseScoreModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Quiz Completed</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="text-center modal-text">
+                <Modal.Body className="text-center">
+                    <h4>Your Score</h4>
                     <img src={cupGif} alt="Trophy" className="trophy-gif" />
-                    <h3>Quiz Completed!</h3>
-                    <p className="correct-text">Correct Answers: <strong>{correctCount}</strong></p>
-                    <p className="wrong-text">Wrong Answers: <strong>{wrongCount}</strong></p>
+                    <p>Total Questions: {quizList.length}</p>
+                    <p className="correct-answer-text">Correct Answers: {score}</p>
+                    <p className="wrong-answer-text">Wrong Answers: {wrongCount}</p>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={() => navigate(`/newpage/${continent}`)}>OK</Button>
+                    <Button variant="primary" onClick={handleCloseScoreModal}>OK</Button>
                 </Modal.Footer>
             </Modal>
         </div>
