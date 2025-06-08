@@ -32,6 +32,7 @@ const Game = () => {
         setGuessedLocation(guess);
         setShowResults(true);
         setMiniMapExpanded(true);
+        setShowStreetView(false);
     };
 
     const handlePlayAgain = () => {
