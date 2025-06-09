@@ -1,4 +1,4 @@
-    import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, useMapEvents, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -10,6 +10,28 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
   iconUrl: require("leaflet/dist/images/marker-icon.png"),
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+});
+
+const correctIcon = new L.Icon({
+  iconUrl: require("../images/pin.png"),
+  iconRetinaUrl: require("../images/pin.png"),
+  iconSize: [35, 41],
+  iconAnchor: [17, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  shadowSize: [41, 41],
+  className: "correct-marker",
+});
+
+const guessIcon = new L.Icon({
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  shadowSize: [41, 41],
+  className: "guess-marker",
 });
 
 const MapResizeHandler = () => {
@@ -53,6 +75,19 @@ const ClickableMap = ({ onGuessSubmit, showSubmitButton = true, correctLocation,
     // If showResults is true, use guessedLocation from props instead of local guessLocation state
     const displayGuessLocation = showResults ? guessedLocation : guessLocation;
 
+    // Normalize coordinates to [lat, lon] array if they are objects with lat and lon properties
+    const normalizeCoords = (coords) => {
+        if (!coords) return null;
+        if (Array.isArray(coords)) return coords;
+        if (typeof coords === "object" && coords.lat !== undefined && coords.lon !== undefined) {
+            return [coords.lat, coords.lon];
+        }
+        return null;
+    };
+
+    const normCorrectLocation = normalizeCoords(correctLocation);
+    const normDisplayGuessLocation = normalizeCoords(displayGuessLocation);
+
     // Calculate distance if both locations are available
     const haversineDistance = (coords1, coords2) => {
         function toRad(x) {
@@ -78,12 +113,35 @@ const ClickableMap = ({ onGuessSubmit, showSubmitButton = true, correctLocation,
         return d;
     };
 
-    const distance = correctLocation && displayGuessLocation ? haversineDistance(correctLocation, displayGuessLocation).toFixed(2) : null;
+    const distance = normCorrectLocation && normDisplayGuessLocation ? Math.round(haversineDistance(normCorrectLocation, normDisplayGuessLocation)) : null;
+
+    function getPlayfulMessage(distance) {
+        const d = parseFloat(distance);
+        if (d === 0) {
+            return "Bullseye! You nailed it perfectly! Are you a wizard or what?";
+        } else if (d < 5) {
+            return "Whoa, so close! Did you peek at the answer?";
+        } else if (d < 20) {
+            return "Almost there! Your geography skills are decent, I guess.";
+        } else if (d < 100) {
+            return "Hmm, you’re in the neighborhood. Try not to get lost next time!";
+        } else if (d < 500) {
+            return "You’re somewhere on the planet, that’s a start!";
+        } else if (d < 2000) {
+            return "Oof, that’s a stretch. Did you even look at the map?";
+        } else if (d < 5000) {
+            return "Wow, that’s a wild guess! Were you aiming for a different planet?";
+        } else if (d < 10000) {
+            return "Completely off the map! Did you just spin the globe and point?";
+        } else {
+            return "You might want to check your compass... or get one!";
+        }
+    }
 
     return (
         <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
             <MapContainer
-                center={correctLocation || [20, 0]}
+                center={normCorrectLocation || [20, 0]}
                 zoom={showResults ? 4 : 2}
                 minZoom={2}
                 style={{ height: "100%", width: "100%" }}
@@ -91,9 +149,9 @@ const ClickableMap = ({ onGuessSubmit, showSubmitButton = true, correctLocation,
                 <MapResizeHandler />
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <MapClickHandler />
-                {showResults && correctLocation && <Marker position={correctLocation} />}
-                {displayGuessLocation && <Marker position={displayGuessLocation} />}
-                {showResults && correctLocation && displayGuessLocation && <Polyline positions={[correctLocation, displayGuessLocation]} color="red" />}
+                {showResults && normCorrectLocation && <Marker position={normCorrectLocation} icon={correctIcon} />}
+                {normDisplayGuessLocation && <Marker position={normDisplayGuessLocation} icon={guessIcon} />}
+                {showResults && normCorrectLocation && normDisplayGuessLocation && <Polyline positions={[normCorrectLocation, normDisplayGuessLocation]} color="red" />}
             </MapContainer>
             {showResults && distance && (
                 <div
@@ -110,7 +168,7 @@ const ClickableMap = ({ onGuessSubmit, showSubmitButton = true, correctLocation,
                         zIndex: 1100,
                     }}
                 >
-                    Distance between your guess and the correct location: {distance} km
+                    {getPlayfulMessage(distance)} (Distance: {distance} km)
                 </div>
             )}
             {!showResults && showSubmitButton && (

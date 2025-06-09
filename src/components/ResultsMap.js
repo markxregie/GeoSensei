@@ -33,6 +33,29 @@ const ResultsMap = ({ correctLocation, guessedLocation }) => {
         [guessedLocation[0], guessedLocation[1]]
     ).toFixed(2);
 
+function getPlayfulMessage(distance) {
+    const d = parseFloat(distance);
+    if (d === 0) {
+        return "Bullseye! You nailed it perfectly! Are you a wizard or what?";
+    } else if (d < 5) {
+        return "Whoa, so close! Did you peek at the answer?";
+    } else if (d < 20) {
+        return "Almost there! Your geography skills are decent, I guess.";
+    } else if (d < 100) {
+        return "Hmm, you’re in the neighborhood. Try not to get lost next time!";
+    } else if (d < 500) {
+        return "You’re somewhere on the planet, that’s a start!";
+    } else if (d < 2000) {
+        return "Oof, that’s a stretch. Did you even look at the map?";
+    } else if (d < 5000) {
+        return "Wow, that’s a wild guess! Were you aiming for a different planet?";
+    } else if (d < 10000) {
+        return "Completely off the map! Did you just spin the globe and point?";
+    } else {
+        return "You might want to check your compass... or get one!";
+    }
+}
+
     return (
         <div>
             <MapContainer center={correctLocation} zoom={3} style={{ height: "90vh" }}>
@@ -42,7 +65,7 @@ const ResultsMap = ({ correctLocation, guessedLocation }) => {
                 <Polyline positions={[correctLocation, guessedLocation]} color="red" />
             </MapContainer>
             <div style={{ textAlign: "center", marginTop: "10px", fontSize: "18px" }}>
-                Distance between your guess and the correct location: {distance} km
+                {getPlayfulMessage(distance)} (Distance: {distance} km)
             </div>
         </div>
     );

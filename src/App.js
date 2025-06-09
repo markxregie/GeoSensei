@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useParams, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useParams, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Appheader from "./components/header";
@@ -22,8 +22,8 @@ function App() {
 
   return (
     <div className="App">
-      <Chatbot />
       <Router>
+        <ConditionalChatbot />
         <Routes>
           {/* Home Page */}
           <Route
@@ -56,7 +56,7 @@ function App() {
             path="/geoguess"
             element={
               <>
-                <NewHeader setContinent={setContinent} activeContinent={continent} />
+                {/* Hide header on geoguess page */}
                 <main>
                   <Game />
                 </main>
@@ -70,6 +70,14 @@ function App() {
       </Router>
     </div>
   );
+}
+
+function ConditionalChatbot() {
+  const location = useLocation();
+  if (location.pathname === "/geoguess") {
+    return null;
+  }
+  return <Chatbot />;
 }
 
 /* ✅ Fix: Show Only One Quiz Component Based on URL */
