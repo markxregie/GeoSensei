@@ -194,7 +194,7 @@ const Game = () => {
     />
     <p style={{ fontSize: "18px", color: "white", textAlign: "center", maxWidth: "80%" }}>
         {[
-            "1. Click Next to start. Don’t just sit there.",
+            "1. Click Start Game to start. Don’t just sit there.",
             "2. Tap the center arrow on the Street Map. Yes, that one.",
             "3. Use the arrow buttons to stroll around like a nosy tourist.",
             "4. Click the mini-map, drop your pin, and make your guess.",

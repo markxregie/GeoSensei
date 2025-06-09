@@ -16,6 +16,7 @@ import Capitals from "./components/capital";
 import Landmark from "./components/Landmark";
 import NotFound from "./pages/NotFound";
 import Game from "./components/GameScreen"; // GeoGuessing Game Component
+import BehindTheProject from "./components/BehindTheProject";
 
 function App() {
   const [continent, setContinent] = useState("Asia");
@@ -63,6 +64,9 @@ function App() {
               </>
             }
           />
+
+          {/* Behind The Project Page */}
+          <Route path="/behindtheproject" element={<BehindTheProject />} />
 
           {/* 404 Page */}
           <Route path="*" element={<NotFound />} />

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import './footer.css';
 
@@ -9,11 +10,11 @@ export default function AppFooter() {
                 <div className="footer-content">
                     <p>&copy; {new Date().getFullYear()} GeoSensei. All Rights Reserved.</p>
                     <ul className="footer-links">
-                         <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#Innovation">Innovation</a></li>
-                        <li><a href="#Beneficiaries">Beneficiaries</a></li>
-                        
+                         <li><Link to="/">Home</Link></li>
+                        <li><Link to="/#about">About</Link></li>
+                        <li><Link to="/#Innovation">Innovation</Link></li>
+                        <li><Link to="/#Beneficiaries">Beneficiaries</Link></li>
+                        <li><Link to="/behindtheproject">Behind the Project</Link></li>
                     </ul>
                 </div>
             </Container>

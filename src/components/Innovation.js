@@ -16,15 +16,16 @@ export default function AppInnovation() {
                     <div className="about-item">
                         <img src="/Assets/rocket1.svg" alt="world" className="about-img" />
                         <h2 className="about-subtitle">Unique Aspects</h2>
-                        <p>GeoSensei offers a gamified learning experience with interactive quizzes that make geography learning fun and engaging. Users can collect badges as they progress, providing motivation to continue learning. Additionally, the app features an AI-powered chatbot that is restricted to geography topics, allowing users to receive hints and learning assistance in a focused and interactive manner.</p>
+                        <p>GeoSensei makes geography learning fun with two exciting game modes: classic quizzes and the immersive StreetMap challenge. Test your knowledge of flags, capitals, and countries, or drop into real-world street views and guess the location. With an AI-powered chatbot limited to geography topics, you can explore and learn in a focused, interactive way.
+
+</p>
                     </div>
 
                     {/* Right Section */}
                     <div className="about-item">
                         <img src="/Assets/rocket2.svg" alt="world" className="about-img" />
                         <h2 className="about-subtitle">Emerging technologies</h2>
-                        <p>   The app integrates advanced technologies to enhance user experience, including an AI-powered chatbot with geography-specific filtering to ensure relevant assistance. Gamification elements are incorporated to boost engagement and motivation. Furthermore, GeoSensei utilizes a cloud-based database, enabling scalability and real-time quiz updates to keep content fresh and dynamic.</p>
-                    </div>
+GeoSensei integrates advanced technologies to deliver an immersive and scalable learning experience. The "Where Am I?" quiz mode is powered by geospatial data, geotagging, reverse geocoding, and location metadata, allowing users to explore real-world environments and make informed location guesses. These features work together to simulate realistic navigation and improve spatial awareness. Backed by a cloud-based system, GeoSensei supports real-time content updates and consistent performance across devices. Additionally, a geography-focused chatbot with generative text capabilities allows users to interact naturally, ask questions, and receive contextual responses related to geography topics.                  </div>
                 </div>
                 <div className="div3">                       
                        <img src="/Assets/city.svg" alt="fig" className="city" />                      

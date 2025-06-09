@@ -15,7 +15,7 @@ export default function AppAbout() {
                     <div className="about-item">
                         <img src="/Assets/world.svg" alt="world" className="about-img" />
                         <h2 className="about-subtitle">What is GeoSensei</h2>
-                        <p>         GeoSensei is an engaging and educational mobile app designed to make learning about geography enjoyable for everyone. It serves as more than just a learning app—it is a comprehensive geography learning and entertainment platform that caters to individuals passionate about geography or those looking to expand their knowledge of the world.</p>
+                        <p>         GeoSensei is an engaging and educational web app designed to make learning about geography enjoyable for everyone. It serves as more than just a learning app. It is a comprehensive geography learning and entertainment platform that caters to individuals passionate about geography or those looking to expand their knowledge of the world.</p>
                     </div>
 
                     {/* Right Section */}
