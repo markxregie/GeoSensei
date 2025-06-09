@@ -192,3 +192,70 @@
   margin-top: 4px;
   text-align: right;
 }
+
+.bot-gif-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 0;
+}
+
+.suggested-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 5px;
+
+
+  justify-content: center;
+}
+
+.suggested-question-button {
+  background-color: #563C5C;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.suggested-question-button:hover:not(:disabled) {
+  background-color: #7a5a7a;
+}
+
+.suggested-question-button:disabled {
+  background-color: #a89ca8;
+  cursor: not-allowed;
+}
+
+.suggested-questions-container {
+  margin-bottom: 1rem;
+}
+
+.suggested-questions-header {
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.geobot-header {
+  margin-top: 1.7rem !important;
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #563C5C;
+  margin: 0;
+}
+
+.geobot-subtitle {
+  
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-top: 0.2rem;
+  
+}

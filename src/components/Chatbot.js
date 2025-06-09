@@ -16,6 +16,48 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const abortControllerRef = useRef(null);
 
+  // Suggested clickable questions
+  // Removed fixed default questions and replaced with random question generator
+
+  const [suggestedQuestions, setSuggestedQuestions] = useState([]);
+
+  // Function to generate random geography questions
+  const generateRandomQuestions = (count) => {
+    const countries = ["France", "Germany", "Japan", "Brazil", "Canada", "Australia", "India", "China", "Russia", "Egypt"];
+    const questionTemplates = [
+      (country) => `What is the capital of ${country}?`,
+      () => "Tell me about the continents.",
+      (country) => `What countries border ${country}?`,
+      (country) => `What is the population of ${country}?`,
+      (country) => `Show me the flag of ${country}.`,
+      (country) => `What is the language spoken in ${country}?`,
+      (country) => `What is the currency used in ${country}?`,
+      (country) => `What is the time zone of ${country}?`,
+      (country) => `What are some famous landmarks in ${country}?`,
+      () => "What are the major rivers in the world?"
+    ];
+
+    const questions = [];
+    for (let i = 0; i < count; i++) {
+      const template = questionTemplates[Math.floor(Math.random() * questionTemplates.length)];
+      if (template.length === 0) {
+        // template with no argument
+        questions.push(template());
+      } else {
+        const country = countries[Math.floor(Math.random() * countries.length)];
+        questions.push(template(country));
+      }
+    }
+    return questions;
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      const randomQuestions = generateRandomQuestions(6);
+      setSuggestedQuestions(randomQuestions);
+    }
+  }, [isOpen]);
+
   // Geography-related keywords
   const geographyKeywords = [
     'country', 'countries', 'capital', 'capitals', 'continent', 'continents',
@@ -68,6 +110,11 @@ const Chatbot = () => {
     return geographyKeywords.some(keyword => lowerQuestion.includes(keyword));
   };
 
+  const handleSuggestedQuestionClick = (question) => {
+    // Directly send the clicked question without waiting for input state update
+    handleSend(question);
+  };
+
   const getGreetingResponse = (text) => {
     const lowerText = text.toLowerCase().trim();
     for (const greet of greetingKeywords) {
@@ -78,18 +125,21 @@ const Chatbot = () => {
     return null;
   };
 
-  const handleSend = async () => {
-    if (input.trim()) {
+  const handleSend = async (message) => {
+    const msgToSend = message !== undefined ? message : input;
+    if (typeof msgToSend === "string" && msgToSend.trim()) {
       const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: input, sender: "user", time: timestamp },
+        { text: msgToSend, sender: "user", time: timestamp },
       ]);
-      setInput("");
+      if (message === undefined) {
+        setInput("");
+      }
 
       // Check if input is a greeting or polite phrase
-      const greetingResponse = getGreetingResponse(input);
+      const greetingResponse = getGreetingResponse(msgToSend);
       if (greetingResponse) {
         const botTimestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -118,7 +168,7 @@ const Chatbot = () => {
       }
 
       // Check if question is geography-related
-      if (!isGeographyQuestion(input)) {
+      if (!isGeographyQuestion(msgToSend)) {
         const botTimestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -143,7 +193,7 @@ const Chatbot = () => {
       try {
         const response = await axios.post(
           "http://localhost:3002/api/chatbot/message",
-          { message: input },
+          { message: msgToSend },
           { signal: abortControllerRef.current.signal }
         );
 
@@ -200,6 +250,7 @@ const Chatbot = () => {
       {isOpen && (
         <div className="chatbot-content">
           <div className="chatbot-header">
+            <img src={botAvatar} alt="Bot Gif" className="bot-gif-circle" />
             <h3>Geobot</h3>
             <button onClick={toggleChatbot} className="minimize-button">
               <img src={minimizeIcon} alt="Minimize" />
@@ -223,6 +274,26 @@ const Chatbot = () => {
                 {msg.sender === "user" && <img src={userAvatar} alt="User" className="avatar" />}
               </div>
             ))}
+            {!messages.some(msg => msg.sender === "user") && (
+              <div className="suggested-questions-container">
+                <div className="suggested-questions-header">
+                  <h2 className="geobot-header">GeoBot</h2>
+                  <div className="geobot-subtitle">Your friendly geography assistant</div>
+                </div>
+                <div className="suggested-questions">
+                  {suggestedQuestions.map((question, idx) => (
+                    <button
+                      key={idx}
+                      className="suggested-question-button"
+                      onClick={() => handleSuggestedQuestionClick(question)}
+                      disabled={isBotTyping}
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
           <div className="chatbot-input">
