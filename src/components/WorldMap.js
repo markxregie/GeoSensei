@@ -142,9 +142,15 @@ const ClickableMap = ({ onGuessSubmit, showSubmitButton = true, correctLocation,
         <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
             <MapContainer
                 center={normCorrectLocation || [20, 0]}
-                zoom={showResults ? 4 : 2}
-                minZoom={2}
-                style={{ height: "100%", width: "100%" }}
+            zoom={showResults ? 4 : 2}
+            minZoom={showResults ? 4 : 2}
+            maxZoom={18}
+            maxBounds={[
+                [-90, -180],
+                [90, 180]
+            ]}
+            maxBoundsViscosity={1.0}
+            style={{ height: "100%", width: "100%" }}
             >
                 <MapResizeHandler />
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

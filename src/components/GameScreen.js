@@ -12,6 +12,9 @@ import img2 from "../images/2.png";
 import img3 from "../images/3.png";
 import img4 from "../images/4.png";
 import img5 from "../images/5.png";
+import botAvatar from "../images/bot.gif";
+
+import axios from "axios";
 
 const Game = () => {
     const navigate = useNavigate();
@@ -24,8 +27,72 @@ const Game = () => {
     const [muted, setMuted] = useState(false);
     const [showHelpCarousel, setShowHelpCarousel] = useState(false);
     const [carouselIndex, setCarouselIndex] = useState(0);
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [aiDescription, setAiDescription] = useState("");
+    const [displayedText, setDisplayedText] = useState("");
+
 
     const audioRef = useRef(null);
+
+    useEffect(() => {
+        if (showModal && correctLocation) {
+            fetchAiDescription(correctLocation);
+        }
+    }, [showModal, correctLocation]);
+
+    // Typing animation effect for aiDescription
+    useEffect(() => {
+        if (!aiDescription) {
+            setDisplayedText("");
+            return;
+        }
+        let index = 0;
+        setDisplayedText("");
+        const interval = setInterval(() => {
+            setDisplayedText((prev) => prev + aiDescription.charAt(index));
+            index++;
+            if (index >= aiDescription.length) {
+                clearInterval(interval);
+            }
+        }, 30); // typing speed in ms
+        return () => clearInterval(interval);
+    }, [aiDescription]);
+
+    const fetchAiDescription = async (location) => {
+        try {
+            if (!location) {
+                setAiDescription("Location coordinates are not available.");
+                return;
+            }
+            // Support multiple possible coordinate property names
+            const lat = location.lat ?? location.latitude;
+            const lng = location.lng ?? location.longitude ?? location.lon;
+            if (lat === undefined || lng === undefined) {
+                setAiDescription("Location coordinates are not available.");
+                return;
+            }
+            const prompt = `What country and city is located at latitude ${lat} and longitude ${lng}? What is the language used, currency, most produced products, population, and capital of the country? Please provide a simple answer.`;
+            const response = await axios.post(
+                "http://localhost:3002/api/chatbot/message",
+                { message: prompt }
+            );
+            setAiDescription(response.data.message);
+        } catch (error) {
+            console.error("Error fetching AI description:", error);
+            setAiDescription("Sorry, I couldn't fetch the description at this time.");
+        }
+    };
+
+    useEffect(() => {
+        if (showResults) {
+            setShowTooltip(true);
+            const timer = setTimeout(() => {
+                setShowTooltip(false);
+            }, 7000);
+            return () => clearTimeout(timer);
+        }
+    }, [showResults]);
 
     useEffect(() => {
         if (audioRef.current) {
@@ -345,6 +412,46 @@ const Game = () => {
             ) : (
                 <div style={{ height: "100vh", position: "relative" }}>
                     <WorldMap onGuessSubmit={handleGuessSubmit} correctLocation={correctLocation} guessedLocation={guessedLocation} showResults={showResults} />
+                    <div style={{ position: "absolute", top: 20, right: 20, zIndex: 1100 }}>
+                        <div style={{ position: "relative", display: "inline-block" }}>
+                            <button
+                                onClick={() => setShowModal(true)}
+                                onMouseEnter={() => setShowTooltip(true)}
+                                onMouseLeave={() => setShowTooltip(false)}
+                                style={{
+                                    backgroundColor: "transparent",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    padding: "4px",
+                                    userSelect: "none",
+                                }}
+                                aria-label="Help"
+                            >
+                                <img src={helpCircle} alt="Help" style={{ width: "35px", height: "35px" }} />
+                            </button>
+                            <div
+                                style={{
+                                    visibility: showTooltip ? "visible" : "hidden",
+                                    width: "180px",
+                                    backgroundColor: "#5D4A68",
+                                    color: "#fff",
+                                    textAlign: "center",
+                                    borderRadius: "6px",
+                                    padding: "8px",
+                                    position: "absolute",
+                                    zIndex: 1200,
+                                    top: "40px",
+                                    right: "0",
+                                    fontSize: "14px",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                                    userSelect: "none",
+                                }}
+                                className="tooltip-text"
+                            >
+                                Where Am I Now? Learn more about this place
+                            </div>
+                        </div>
+                    </div>
                     <div style={{ position: "absolute", bottom: 20, right: 20, zIndex: 1100 }}>
                         <button
                             onClick={handlePlayAgain}
@@ -391,6 +498,84 @@ const Game = () => {
                         >
                             Back
                         </button>
+                    </div>
+                </div>
+            )}
+            {showModal && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        zIndex: 3000,
+                    }}
+                    onClick={() => setShowModal(false)}
+                >
+                    <div
+                        style={{
+                            backgroundColor: "white",
+                            borderRadius: "8px",
+                            padding: "20px",
+                            maxWidth: "600px",
+                            width: "90%",
+                            maxHeight: "70vh",
+                            overflowY: "auto",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                            position: "relative",
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowModal(false)}
+                            style={{
+                                position: "absolute",
+                                top: "10px",
+                                right: "10px",
+                                backgroundColor: "transparent",
+                                border: "none",
+                                fontSize: "20px",
+                                cursor: "pointer",
+                            }}
+                            aria-label="Close Modal"
+                        >
+                            &times;
+                        </button>
+            <div style={{ borderBottom: "1px solid #ccc", paddingBottom: "10px", marginBottom: "10px" }}>
+                <h2 style={{ margin: 0, fontWeight: "bold" }}>Where Am I Now?</h2>
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <img
+                    src={botAvatar}
+                    alt="Bot"
+                    style={{
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                    }}
+                />
+                <div
+                    style={{
+                        backgroundColor: "#5D4A68",
+                        color: "white",
+                        borderRadius: "12px",
+                        padding: "12px 16px",
+                        maxWidth: "480px",
+                        fontSize: "16px",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+                        lineHeight: "1.4",
+                        whiteSpace: "pre-wrap",
+                    }}
+                    dangerouslySetInnerHTML={{ __html: displayedText ? displayedText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') : "Loading description..." }}
+                >
+                </div>
+            </div>
                     </div>
                 </div>
             )}
