@@ -48,7 +48,8 @@ const Game = () => {
             return;
         }
         let index = 0;
-        setDisplayedText("");
+        setDisplayedText(aiDescription.charAt(0)); // Set first character immediately
+        index = 1;
         const interval = setInterval(() => {
             setDisplayedText((prev) => prev + aiDescription.charAt(index));
             index++;
@@ -568,6 +569,7 @@ const Game = () => {
                         padding: "12px 16px",
                         maxWidth: "480px",
                         fontSize: "16px",
+                        
                         boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
                         lineHeight: "1.4",
                         whiteSpace: "pre-wrap",

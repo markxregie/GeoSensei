@@ -15,6 +15,7 @@ import Guesstheflag from "./components/Guesstheflag";
 import Capitals from "./components/capital";
 import Landmark from "./components/Landmark";
 import NotFound from "./pages/NotFound";
+import Explore from "./pages/Explore";
 import Game from "./components/GameScreen"; // GeoGuessing Game Component
 import BehindTheProject from "./components/BehindTheProject";
 
@@ -69,6 +70,7 @@ function App() {
           <Route path="/behindtheproject" element={<BehindTheProject />} />
 
           {/* 404 Page */}
+          <Route path="/explore/:continent" element={<Explore />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
