@@ -19,8 +19,7 @@ export default function Home() {
                     <div className="div2">
                         <h1 className="home-title">Welcome to GeoSensei</h1>
                         <p className="lead fs-4">
-                            Your ultimate geography learning companion! Explore the world's wonders and 
-                            sharpen your geographical knowledge with us.
+                            Your ultimate geography learning companion. Get ready to explore, discover, and master the map like never before.
                         </p>
                         <button
                             className="btn btn-primary rounded-pill px-4 py-2 home-button"
