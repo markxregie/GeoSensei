@@ -49,7 +49,7 @@ const GeoSection = ({ continent }) => {
             <h2 className="card-title">Explore</h2>
           </div>
 
-          <div className="game-card" onClick={() => goToQuiz("trivia")}>
+          <div className="game-card" onClick={() => navigate("/trivia")}>
             <div className="card-image">
               <img src={triviagif} alt="Capitals" className="gif-image" />
             </div>

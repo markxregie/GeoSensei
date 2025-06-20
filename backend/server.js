@@ -13,15 +13,89 @@ const PORT = process.env.PORT || 3002;
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from public folder
 const path = require('path');
+const fs = require('fs');
+
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use("/api/chatbot", chatbotRoutes);
 
-// Store access token in memory (for demo purposes)
-let mapillaryAccessToken = null;
-let mapillaryTokenExpiry = null;
+// Added modules for file system and path
+// Removed duplicate 'const path = require('path');'
+
+// Path to token storage file
+const tokenFilePath = path.join(__dirname, 'mapillary_tokens.json');
+
+// Load tokens from file if exists
+let mapillaryTokens = null;
+function loadTokens() {
+    if (fs.existsSync(tokenFilePath)) {
+        const data = fs.readFileSync(tokenFilePath, 'utf-8');
+        mapillaryTokens = JSON.parse(data);
+        console.log('Loaded Mapillary tokens from file.');
+    } else {
+        mapillaryTokens = null;
+        console.log('No Mapillary token file found.');
+    }
+}
+
+// Save tokens to file
+function saveTokens(tokens) {
+    fs.writeFileSync(tokenFilePath, JSON.stringify(tokens, null, 2));
+    mapillaryTokens = tokens;
+    console.log('Saved Mapillary tokens to file.');
+}
+
+// Refresh access token using refresh token
+async function refreshAccessToken() {
+    if (!mapillaryTokens || !mapillaryTokens.refresh_token) {
+        console.log('No refresh token available.');
+        return false;
+    }
+    const clientId = "24211086625146458";
+    const clientSecret = "MLY|24211086625146458|efe4dd32abaff2377c1d17a97de69912";
+    const tokenUrl = "https://graph.mapillary.com/token";
+
+    const body = {
+        grant_type: "refresh_token",
+        refresh_token: mapillaryTokens.refresh_token,
+        client_id: clientId
+    };
+
+    try {
+        const response = await axios.post(tokenUrl, body, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `OAuth ${clientSecret}`
+            }
+        });
+        const newTokens = {
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token || mapillaryTokens.refresh_token,
+            expires_in: response.data.expires_in,
+            expiry_time: Date.now() + response.data.expires_in * 1000
+        };
+        saveTokens(newTokens);
+        console.log('Access token refreshed successfully.');
+        return true;
+    } catch (error) {
+        console.error('Error refreshing access token:', error.response?.data || error.message);
+        return false;
+    }
+}
+
+// Initialize tokens on server start
+loadTokens();
+if (mapillaryTokens) {
+    if (Date.now() >= mapillaryTokens.expiry_time) {
+        console.log('Access token expired, refreshing...');
+        refreshAccessToken();
+    } else {
+        console.log('Access token valid.');
+    }
+} else {
+    console.log('No tokens loaded, manual authorization required.');
+}
 
 // Endpoint to redirect user to Mapillary authorization URL
 app.get("/api/mapillary/auth", (req, res) => {
@@ -59,10 +133,15 @@ app.get("/api/mapillary/callback", async (req, res) => {
     }
   });
 
-    mapillaryAccessToken = response.data.access_token;
-    mapillaryTokenExpiry = Date.now() + response.data.expires_in * 1000;
+    const tokens = {
+        access_token: response.data.access_token,
+        refresh_token: response.data.refresh_token,
+        expires_in: response.data.expires_in,
+        expiry_time: Date.now() + response.data.expires_in * 1000
+    };
+    saveTokens(tokens);
 
-    console.log("Obtained access token:", mapillaryAccessToken);
+    console.log("Obtained access token:", tokens.access_token);
     res.send("Authorization successful. You can close this window.");
   } catch (error) {
     console.error("Error exchanging authorization code for token:", error.response?.data || error.message);
@@ -70,14 +149,13 @@ app.get("/api/mapillary/callback", async (req, res) => {
   }
 });
 
-
 app.get("/api/mapillary/token", (req, res) => {
-    console.log("Serving Mapillary access token:", mapillaryAccessToken ? "Present" : "Missing or expired");
-    if (!mapillaryAccessToken || Date.now() >= mapillaryTokenExpiry) {
+    if (!mapillaryTokens || !mapillaryTokens.access_token || Date.now() >= mapillaryTokens.expiry_time) {
         console.log("Access token missing or expired");
         return res.status(401).json({ error: "Access token not available or expired. Please reauthorize." });
     }
-    res.json({ accessToken: mapillaryAccessToken });
+    console.log("Serving Mapillary access token: Present");
+    res.json({ accessToken: mapillaryTokens.access_token });
 });
 
 // New endpoint to get flags and options by continent

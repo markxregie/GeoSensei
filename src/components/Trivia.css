@@ -1,0 +1,51 @@
+.trivia-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.trivia-image {
+  max-width: 100%;
+  height: 380px;
+
+}
+
+.trivia-heading {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.trivia-message {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  max-width: 900px;
+ text-align: justify;
+}
+
+.trivia-bold-message {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+  max-width: 950px;
+  
+}
+
+.teleport-button {
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: none;
+  background-color: var(--english-violet);
+  color: white;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.teleport-button:hover {
+  background-color: var(--davys-gray);
+}

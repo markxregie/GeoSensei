@@ -14,6 +14,7 @@ import Chatbot from "./components/Chatbot";
 import Guesstheflag from "./components/Guesstheflag";
 import Capitals from "./components/capital";
 import Landmark from "./components/Landmark";
+import Trivia from "./components/Trivia";
 import NotFound from "./pages/NotFound";
 import Explore from "./pages/Explore";
 import Game from "./components/GameScreen"; // GeoGuessing Game Component
@@ -71,6 +72,7 @@ function App() {
 
           {/* 404 Page */}
           <Route path="/explore/:continent" element={<Explore />} />
+          <Route path="/trivia" element={<Trivia />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
@@ -97,6 +99,7 @@ function QuizComponent({ setContinent, continent }) {
         {quizType === "guess-the-flag" && <Guesstheflag />}
         {quizType === "capitals" && <Capitals />}
         {quizType === "landmark" && <Landmark />}
+        {quizType === "trivia" && <Trivia />}
       </main>
     </>
   );
