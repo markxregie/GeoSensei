@@ -1,7 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./Trivia.css";
 
 const Trivia = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="trivia-container">
       <img src="/Assets/Coming Soon 2.png" alt="Coming Soon" className="trivia-image" />
@@ -14,7 +17,7 @@ GeoSensei is almost ready to take you on an epic quest through countries, capita
 So grab your backpack, sharpen your sense of direction, and get ready to test your world knowledge like never before. The journey is coming soon.
 </p>
       <p className="trivia-bold-message">The map isn’t ready… but your journey is. Hold tight. The world tour launches soon..</p>
-      <button className="teleport-button" onClick={() => window.location.href = "http://localhost:3000/newpage/asia"}>Teleport to Safety</button>
+      <button className="teleport-button" onClick={() => navigate("/")}>Teleport to Safety</button>
     </div>
   );
 };

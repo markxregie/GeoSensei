@@ -49,3 +49,51 @@
 .teleport-button:hover {
   background-color: var(--davys-gray);
 }
+/* Responsive styles for smaller devices */
+@media (max-width: 768px) {
+  .navbar-brand {
+    margin-left: 0;
+    font-size: 2rem;
+  }
+
+  .navbar-nav {
+    margin-right: 0;
+    gap: 20px;
+  }
+
+  .navbar-nav .nav-link {
+    font-size: 16px;
+  }
+
+  .custom-button {
+    margin-right: 0;
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+
+  .navbar-collapse {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-brand {
+    font-size: 1.5rem;
+  }
+
+  .navbar-nav {
+    gap: 10px;
+  }
+
+  .navbar-nav .nav-link {
+    font-size: 14px;
+  }
+
+  .custom-button {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 14px;
+    border-radius: 20px;
+  }
+}
