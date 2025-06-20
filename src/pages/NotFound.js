@@ -7,7 +7,7 @@ const NotFound = () => {
 
   return (
     <div className="not-found-container">
-      <img src="/assets/error.png" alt="404 UFO" className="not-found-image" />
+      <img src="/Assets/ufo.png" alt="404 UFO" className="not-found-image" />
       <h1>404</h1>
       <h2>GeoSensei Says: "You're Off the Map!"</h2>
       <p>You've wandered so far, even satellites can't track you!<br />

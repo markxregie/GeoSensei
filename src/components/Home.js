@@ -36,7 +36,7 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="div3"> 
-                   <img src="/Assets/cloudy.svg" alt="fig" className="cloud" />
+                   <img src="/Assets/homecloud.svg" alt="cloud" className="cloud" />
                 </div>
             </div>
             {loading && ( // Conditionally render loading GIF

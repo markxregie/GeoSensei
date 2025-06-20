@@ -31,7 +31,7 @@ GeoSensei integrates advanced technologies to deliver an immersive and scalable 
                        <img src="/Assets/city.svg" alt="fig" className="city" />                      
                 </div>
                 <div className="div3">                       
-                       <img src="/Assets/wave.svg" alt="fig" className="wave" />                      
+                       <img src="/Assets/ocean.svg" alt="fig" className="wave" />                      
                 </div>
 
             </Container>
