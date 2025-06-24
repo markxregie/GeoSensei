@@ -36,7 +36,7 @@ export default function Capitals() {
         }
 
         // Fetch all capitals quiz data for the continent
-        fetch(`http://localhost:3002/api/flags/all/${continent}`)
+        fetch(`https://geosensei.onrender.com/api/flags/all/${continent}`)
             .then(res => res.json())
             .then(data => {
                 console.log("Fetched capital quiz data:", data);
@@ -140,7 +140,7 @@ export default function Capitals() {
             <div className="flag-box">
                 {quizList.length > 0 ? (
                     <img
-                        src={`http://localhost:3002/${quizList[currentQuestionIndex].correctAnswer.flag_image}`}
+                        src={`https://geosensei.onrender.com/${quizList[currentQuestionIndex].correctAnswer.flag_image}`}
                         alt="Flag"
                         className="flag-image"
                     />

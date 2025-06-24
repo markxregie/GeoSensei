@@ -18,7 +18,7 @@ const StreetView = ({ onLocationLoaded }) => {
         setLoading(true);
         try {
             // Fetch access token from backend
-            const tokenResponse = await fetch("http://localhost:3002/api/mapillary/token");
+            const tokenResponse = await fetch("https://geosensei.onrender.com/api/mapillary/token");
             if (!tokenResponse.ok) {
                 throw new Error("Failed to fetch access token");
             }
@@ -76,7 +76,7 @@ const StreetView = ({ onLocationLoaded }) => {
         const fetchAccessTokenAndCreateViewer = async () => {
             try {
                 console.log("Creating viewer for imageKey:", imageKey);
-                const tokenResponse = await fetch("http://localhost:3002/api/mapillary/token");
+                const tokenResponse = await fetch("https://geosensei.onrender.com/api/mapillary/token");
                 if (!tokenResponse.ok) {
                     throw new Error("Failed to fetch access token");
                 }

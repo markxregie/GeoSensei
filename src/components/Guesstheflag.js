@@ -38,7 +38,7 @@ export default function GuessTheFlag() {
         }
 
         // Fetch all flags and options for the continent from backend API
-        fetch(`http://localhost:3002/api/flags/all/${continent}`)
+        fetch(`https://geosensei.onrender.com/api/flags/all/${continent}`)
             .then(res => res.json())
             .then(data => {
                 const shuffledData = shuffleArray(data);
@@ -160,7 +160,7 @@ export default function GuessTheFlag() {
             <div className="flag-box">
                 {flagsList.length > 0 ? (
                     <img
-                        src={`http://localhost:3002/${flagsList[currentQuestionIndex].correctAnswer.flag_image}`}
+                        src={`https://geosensei.onrender.com/${flagsList[currentQuestionIndex].correctAnswer.flag_image}`}
                         alt="Flag"
                         className="flag-image"
                     />

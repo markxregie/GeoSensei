@@ -75,7 +75,7 @@ const Game = () => {
             }
             const prompt = `What country and city is located at latitude ${lat} and longitude ${lng}? What is the language used, currency, most produced products, population, and capital of the country? Please provide a simple answer.`;
             const response = await axios.post(
-                "http://localhost:3002/api/chatbot/message",
+                "https://geosensei.onrender.com/api/chatbot/message",
                 { message: prompt }
             );
             setAiDescription(response.data.message);

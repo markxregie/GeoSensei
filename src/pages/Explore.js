@@ -158,7 +158,7 @@ export default function Explore() {
       // Immediately fetch Gemini summary on country click
       setSummary("Loading country summary...");
 
-      fetch("http://localhost:3002/summary", {
+      fetch("https://geosensei.onrender.com/summary", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
