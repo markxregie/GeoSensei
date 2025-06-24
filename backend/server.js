@@ -1,7 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
-const chatbotRoutes = require("./chatbot");
+const chatbotRoutes = require("/backend/chatbot.js");
 const { db } = require("./db");  // Import SQLite connection
 require("dotenv").config();
 
