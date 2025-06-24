@@ -192,7 +192,7 @@ const Chatbot = () => {
 
       try {
         const response = await axios.post(
-          "http://localhost:3002/api/chatbot/message",
+          "https://geosensei.onrender.com/api/chatbot/message",
           { message: msgToSend },
           { signal: abortControllerRef.current.signal }
         );
